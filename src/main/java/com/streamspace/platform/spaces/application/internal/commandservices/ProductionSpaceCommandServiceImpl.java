@@ -26,7 +26,6 @@ public class ProductionSpaceCommandServiceImpl implements ProductionSpaceCommand
 
     @Override
     public Optional<ProductionSpace> handle(CreateProductionSpaceCommand command) {
-        // Validate that the owner (user) exists in IAM bounded context
         if (!externalUserService.existsUserById(command.ownerId())) {
             throw new IllegalArgumentException("User with id " + command.ownerId() + " does not exist");
         }

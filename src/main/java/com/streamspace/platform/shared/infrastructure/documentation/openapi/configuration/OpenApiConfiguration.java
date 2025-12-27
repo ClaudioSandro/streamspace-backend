@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfiguration {
     @Bean
     public OpenAPI learningPlatformOpenApi() {
-        // General configuration
         var openApi = new OpenAPI();
         openApi
                 .info(new Info()
@@ -26,7 +25,6 @@ public class OpenApiConfiguration {
                 .externalDocs(new ExternalDocumentation()
                         .description("StreamSpace Documentation")
                         .url("https://github.com/streamspace/docs"));
-        // Add Security Scheme
         final String securitySchemeName = "bearerAuth";
         openApi.addSecurityItem(new SecurityRequirement()
                         .addList(securitySchemeName))
@@ -37,7 +35,6 @@ public class OpenApiConfiguration {
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
                                         .bearerFormat("JWT")));
-        // Return OpenAPI configuration object*/
         return openApi;
     }
 }

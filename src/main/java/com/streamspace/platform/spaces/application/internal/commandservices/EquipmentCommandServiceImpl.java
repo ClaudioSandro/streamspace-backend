@@ -32,7 +32,6 @@ public class EquipmentCommandServiceImpl implements EquipmentCommandService {
         var equipment = productionSpace.addEquipment(command.name(), command.quantity());
         var savedSpace = productionSpaceRepository.save(productionSpace);
 
-        // Obtener el equipment con ID generado después del save
         return savedSpace.getEquipment().stream()
                 .filter(e -> e.getName().equals(command.name()))
                 .findFirst();

@@ -14,10 +14,6 @@ public class ProductionSpaceImageQueryService {
         this.azureBlobStorageService = azureBlobStorageService;
     }
 
-    /**
-     * Generates a signed URL (SAS) for reading an image.
-     * Returns null if imageObjectName is null or blank.
-     */
     public String generateImageUrl(String imageObjectName) {
         if (imageObjectName == null || imageObjectName.isBlank()) {
             return null;

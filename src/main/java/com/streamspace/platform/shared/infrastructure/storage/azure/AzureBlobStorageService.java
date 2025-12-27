@@ -54,4 +54,11 @@ public class AzureBlobStorageService {
         String sas = blobClient.generateSas(values);
         return blobClient.getBlobUrl() + "?" + sas;
     }
+
+    public void delete(String objectName) {
+        var blobClient = containerClient.getBlobClient(objectName);
+        if (blobClient.exists()) {
+            blobClient.delete();
+        }
+    }
 }

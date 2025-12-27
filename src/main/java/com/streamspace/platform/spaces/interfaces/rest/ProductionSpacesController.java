@@ -239,6 +239,34 @@ public class ProductionSpacesController {
         return ResponseEntity.ok(resource);
     }
 
+    @Operation(summary = "Replace cover image for a production space")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image replaced successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid image type"),
+            @ApiResponse(responseCode = "404", description = "Production space not found")
+    })
+    @PutMapping(value = "/{spaceId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadProductionSpaceImageResource> replaceImage(
+            @PathVariable Long spaceId,
+            @RequestParam("file") MultipartFile file) {
+        var command = ReplaceProductionSpaceImageCommandFromResourceAssembler.toCommandFromResource(spaceId, file);
+        var result = productionSpaceImageCommandService.replaceImage(command);
+        var resource = UploadProductionSpaceImageResourceFromResultAssembler.toResourceFromResult(result);
+        return ResponseEntity.ok(resource);
+    }
+
+    @Operation(summary = "Delete cover image from a production space")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Image deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Production space not found")
+    })
+    @DeleteMapping("/{spaceId}/image")
+    public ResponseEntity<Void> deleteImage(@PathVariable Long spaceId) {
+        var command = new com.streamspace.platform.spaces.domain.model.commands.DeleteProductionSpaceImageCommand(spaceId);
+        productionSpaceImageCommandService.deleteImage(command);
+        return ResponseEntity.noContent().build();
+    }
+
     // ====== Equipment Endpoints ======
 
     @Operation(summary = "Get all equipment for a production space")

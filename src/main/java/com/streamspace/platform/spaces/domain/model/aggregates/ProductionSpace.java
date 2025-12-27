@@ -99,12 +99,10 @@ public class ProductionSpace extends AuditableAbstractAggregateRoot<ProductionSp
         this.status = SpaceStatus.ACTIVE;
     }
 
-    // ====== Getters para colecciones inmutables ======
     public List<Equipment> getEquipment() {
         return Collections.unmodifiableList(equipment);
     }
 
-    // ====== Behavior ======
     public void activate() {
         this.status = SpaceStatus.ACTIVE;
     }
@@ -193,12 +191,15 @@ public class ProductionSpace extends AuditableAbstractAggregateRoot<ProductionSp
         this.maxPeople = maxPeople;
     }
 
-    // ====== Image Management ======
     public void changeImageObjectName(String imageObjectName) {
         if (imageObjectName == null || imageObjectName.isBlank()) {
             throw new IllegalArgumentException("imageObjectName is required");
         }
         this.imageObjectName = imageObjectName.trim();
+    }
+
+    public void removeImageObjectName() {
+        this.imageObjectName = null;
     }
 
     public Optional<String> getImageObjectName() {
