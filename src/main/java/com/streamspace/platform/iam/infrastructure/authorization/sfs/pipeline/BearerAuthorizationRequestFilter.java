@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(BearerAuthorizationRequestFilter.class);
@@ -22,11 +23,29 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
     @Qualifier("defaultUserDetailsService")
     private final UserDetailsService userDetailsService;
 
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/api/v1/auth",
+            "/api/v1/authentication",
+            "/v3/api-docs",
+            "/swagger-ui",
+            "/swagger-resources",
+            "/webjars"
+    );
+
     public BearerAuthorizationRequestFilter(BearerTokenService bearerTokenService, UserDetailsService userDetailsService) {
         this.tokenService = bearerTokenService;
         this.userDetailsService = userDetailsService;
     }
 
+    private boolean isPublicPath(String requestPath) {
+        return PUBLIC_PATHS.stream().anyMatch(requestPath::startsWith);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return isPublicPath(path);
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {

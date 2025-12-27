@@ -1,5 +1,7 @@
 package com.streamspace.platform.spaces.interfaces.rest;
 
+import com.streamspace.platform.spaces.application.internal.commandservices.ProductionSpaceImageCommandService;
+import com.streamspace.platform.spaces.application.internal.queryservices.ProductionSpaceImageQueryService;
 import com.streamspace.platform.spaces.domain.model.commands.ActivateProductionSpaceCommand;
 import com.streamspace.platform.spaces.domain.model.commands.DeactivateProductionSpaceCommand;
 import com.streamspace.platform.spaces.domain.model.commands.DeleteProductionSpaceCommand;
@@ -19,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -31,15 +34,21 @@ public class ProductionSpacesController {
     private final ProductionSpaceQueryService productionSpaceQueryService;
     private final EquipmentCommandService equipmentCommandService;
     private final EquipmentQueryService equipmentQueryService;
+    private final ProductionSpaceImageCommandService productionSpaceImageCommandService;
+    private final ProductionSpaceImageQueryService productionSpaceImageQueryService;
 
     public ProductionSpacesController(ProductionSpaceCommandService productionSpaceCommandService,
                                       ProductionSpaceQueryService productionSpaceQueryService,
                                       EquipmentCommandService equipmentCommandService,
-                                      EquipmentQueryService equipmentQueryService) {
+                                      EquipmentQueryService equipmentQueryService,
+                                      ProductionSpaceImageCommandService productionSpaceImageCommandService,
+                                      ProductionSpaceImageQueryService productionSpaceImageQueryService) {
         this.productionSpaceCommandService = productionSpaceCommandService;
         this.productionSpaceQueryService = productionSpaceQueryService;
         this.equipmentCommandService = equipmentCommandService;
         this.equipmentQueryService = equipmentQueryService;
+        this.productionSpaceImageCommandService = productionSpaceImageCommandService;
+        this.productionSpaceImageQueryService = productionSpaceImageQueryService;
     }
 
     @Operation(summary = "Create a new production space")
@@ -54,7 +63,11 @@ public class ProductionSpacesController {
         if (productionSpace.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
-        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(productionSpace.get());
+        var entity = productionSpace.get();
+        var imageUrl = entity.getImageObjectName()
+                .map(productionSpaceImageQueryService::generateImageUrl)
+                .orElse(null);
+        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
         return new ResponseEntity<>(productionSpaceResource, HttpStatus.CREATED);
     }
 
@@ -67,7 +80,12 @@ public class ProductionSpacesController {
         var query = new GetAllProductionSpacesQuery();
         var productionSpaces = productionSpaceQueryService.handle(query);
         var productionSpaceResources = productionSpaces.stream()
-                .map(ProductionSpaceResourceFromEntityAssembler::toResourceFromEntity)
+                .map(entity -> {
+                    var imageUrl = entity.getImageObjectName()
+                            .map(productionSpaceImageQueryService::generateImageUrl)
+                            .orElse(null);
+                    return ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
+                })
                 .toList();
         return ResponseEntity.ok(productionSpaceResources);
     }
@@ -84,7 +102,11 @@ public class ProductionSpacesController {
         if (productionSpace.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(productionSpace.get());
+        var entity = productionSpace.get();
+        var imageUrl = entity.getImageObjectName()
+                .map(productionSpaceImageQueryService::generateImageUrl)
+                .orElse(null);
+        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
         return ResponseEntity.ok(productionSpaceResource);
     }
 
@@ -97,7 +119,12 @@ public class ProductionSpacesController {
         var query = new GetProductionSpacesByOwnerIdQuery(ownerId);
         var productionSpaces = productionSpaceQueryService.handle(query);
         var productionSpaceResources = productionSpaces.stream()
-                .map(ProductionSpaceResourceFromEntityAssembler::toResourceFromEntity)
+                .map(entity -> {
+                    var imageUrl = entity.getImageObjectName()
+                            .map(productionSpaceImageQueryService::generateImageUrl)
+                            .orElse(null);
+                    return ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
+                })
                 .toList();
         return ResponseEntity.ok(productionSpaceResources);
     }
@@ -111,7 +138,12 @@ public class ProductionSpacesController {
         var query = new GetProductionSpacesByCityQuery(city);
         var productionSpaces = productionSpaceQueryService.handle(query);
         var productionSpaceResources = productionSpaces.stream()
-                .map(ProductionSpaceResourceFromEntityAssembler::toResourceFromEntity)
+                .map(entity -> {
+                    var imageUrl = entity.getImageObjectName()
+                            .map(productionSpaceImageQueryService::generateImageUrl)
+                            .orElse(null);
+                    return ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
+                })
                 .toList();
         return ResponseEntity.ok(productionSpaceResources);
     }
@@ -129,7 +161,11 @@ public class ProductionSpacesController {
         if (productionSpace.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(productionSpace.get());
+        var entity = productionSpace.get();
+        var imageUrl = entity.getImageObjectName()
+                .map(productionSpaceImageQueryService::generateImageUrl)
+                .orElse(null);
+        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
         return ResponseEntity.ok(productionSpaceResource);
     }
 
@@ -157,7 +193,11 @@ public class ProductionSpacesController {
         if (productionSpace.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(productionSpace.get());
+        var entity = productionSpace.get();
+        var imageUrl = entity.getImageObjectName()
+                .map(productionSpaceImageQueryService::generateImageUrl)
+                .orElse(null);
+        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
         return ResponseEntity.ok(productionSpaceResource);
     }
 
@@ -173,8 +213,30 @@ public class ProductionSpacesController {
         if (productionSpace.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(productionSpace.get());
+        var entity = productionSpace.get();
+        var imageUrl = entity.getImageObjectName()
+                .map(productionSpaceImageQueryService::generateImageUrl)
+                .orElse(null);
+        var productionSpaceResource = ProductionSpaceResourceFromEntityAssembler.toResourceFromEntity(entity, imageUrl);
         return ResponseEntity.ok(productionSpaceResource);
+    }
+
+    // ====== Image Upload Endpoint ======
+
+    @Operation(summary = "Upload cover image for a production space")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Image uploaded successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid image type"),
+            @ApiResponse(responseCode = "404", description = "Production space not found")
+    })
+    @PostMapping(value = "/{spaceId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UploadProductionSpaceImageResource> uploadImage(
+            @PathVariable Long spaceId,
+            @RequestParam("file") MultipartFile file) {
+        var command = UploadProductionSpaceImageCommandFromResourceAssembler.toCommandFromResource(spaceId, file);
+        var result = productionSpaceImageCommandService.uploadImage(command);
+        var resource = UploadProductionSpaceImageResourceFromResultAssembler.toResourceFromResult(result);
+        return ResponseEntity.ok(resource);
     }
 
     // ====== Equipment Endpoints ======

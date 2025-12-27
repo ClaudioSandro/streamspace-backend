@@ -15,6 +15,7 @@ public record ProductionSpaceResource(
         BigDecimal hourlyRateAmount,
         String hourlyRateCurrency,
         int maxPeople,
-        String rules
+        String rules,
+        String imageUrl
 ) {
 }

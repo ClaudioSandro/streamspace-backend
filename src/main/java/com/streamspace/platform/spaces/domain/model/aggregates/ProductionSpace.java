@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Getter
 @Entity
@@ -69,6 +70,9 @@ public class ProductionSpace extends AuditableAbstractAggregateRoot<ProductionSp
 
     @Column(columnDefinition = "TEXT")
     private String rules;
+
+    @Column(name = "image_object_name")
+    private String imageObjectName;
 
     @OneToMany(mappedBy = "productionSpace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Equipment> equipment = new ArrayList<>();
@@ -187,6 +191,18 @@ public class ProductionSpace extends AuditableAbstractAggregateRoot<ProductionSp
             throw new IllegalArgumentException("maxPeople must be > 0");
         }
         this.maxPeople = maxPeople;
+    }
+
+    // ====== Image Management ======
+    public void changeImageObjectName(String imageObjectName) {
+        if (imageObjectName == null || imageObjectName.isBlank()) {
+            throw new IllegalArgumentException("imageObjectName is required");
+        }
+        this.imageObjectName = imageObjectName.trim();
+    }
+
+    public Optional<String> getImageObjectName() {
+        return Optional.ofNullable(imageObjectName);
     }
 }
 

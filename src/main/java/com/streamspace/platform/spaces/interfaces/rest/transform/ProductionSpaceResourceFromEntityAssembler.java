@@ -6,6 +6,10 @@ import com.streamspace.platform.spaces.interfaces.rest.resources.ProductionSpace
 public class ProductionSpaceResourceFromEntityAssembler {
 
     public static ProductionSpaceResource toResourceFromEntity(ProductionSpace entity) {
+        return toResourceFromEntity(entity, null);
+    }
+
+    public static ProductionSpaceResource toResourceFromEntity(ProductionSpace entity, String imageUrl) {
         return new ProductionSpaceResource(
                 entity.getId(),
                 entity.getOwnerId(),
@@ -19,7 +23,8 @@ public class ProductionSpaceResourceFromEntityAssembler {
                 entity.getHourlyRate().amount(),
                 entity.getHourlyRate().currency(),
                 entity.getMaxPeople(),
-                entity.getRules()
+                entity.getRules(),
+                imageUrl
         );
     }
 }
