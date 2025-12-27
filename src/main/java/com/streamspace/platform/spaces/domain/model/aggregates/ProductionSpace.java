@@ -201,6 +201,10 @@ public class ProductionSpace extends AuditableAbstractAggregateRoot<ProductionSp
         this.imageObjectName = imageObjectName.trim();
     }
 
+    public void removeImageObjectName() {
+        this.imageObjectName = null;
+    }
+
     public Optional<String> getImageObjectName() {
         return Optional.ofNullable(imageObjectName);
     }
